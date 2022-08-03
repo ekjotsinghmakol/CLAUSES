@@ -1,0 +1,59 @@
+
+--PRODUCT TABLE--
+
+create table pro(p_id int primary key identity(1,1), p_name nvarchar(20),Qty_ordered numeric(10,0))
+
+insert into pro values('iphone', 50)
+insert into pro values('Televsion', 80)
+insert into pro values('Laptop', 40)
+insert into pro values('Mouse', 30)
+insert into pro values('Printer', 90)
+
+--ORDER TABLE--
+
+create table ord(ord_id int PRIMARY KEY identity(101,1), p_name nvarchar(20), Mode_of_payment nvarchar(20),p_id int,
+CONSTRAINT fk_ord_p_id 
+FOREIGN KEY(p_id)
+REFERENCES pro(p_id)) 
+
+insert into ord values('iphone','online',1)
+insert into ord values('Televsion','online',2)
+insert into ord values('Laptop','cod',3)
+insert into ord values('Mouse','online',4)
+insert into ord values('Printer','cod',5)
+
+--CUSTOMER TABLE--
+
+create table cust(cust_id int PRIMARY KEY identity(1001,1), cust_name nvarchar(20), amount numeric(20,0),ord_id int,
+CONSTRAINT fk_cust_ord_id 
+FOREIGN KEY(ord_id)
+REFERENCES ord(ord_id)) 
+
+insert into cust values('Akhilesh',150000,101)
+insert into cust values('Ekjot',250000,102)
+insert into cust values('Daksh',50000,103)
+insert into cust values('Ekjot',200000,104)
+insert into cust values('Daksh',300000,105)
+
+select*from ord
+drop table cust
+select * from ord
+
+--GROUP BY CLAUSE--
+
+select cust_name,sum(amount) from cust
+group by cust_name
+
+--ORDER BY CLAUSE--
+
+select * from cust
+order by p_name 
+
+select * from cust
+order by amount
+
+--HAVING CLAUSE--
+select cust_name, sum(amount) as 'total_amount'
+from cust
+group by cust_name
+having sum(amount) > 150000
