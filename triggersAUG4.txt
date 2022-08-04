@@ -1,0 +1,199 @@
+create database collaboration
+use  collaboration
+--BRANDS TABLE--
+create table brands(b_id int primary key identity, b_name nvarchar(20),phone_no numeric(20,0))
+
+insert into brands values('Nike',8527024573)
+insert into brands values('Addidas',9810095175)
+insert into brands values('Puma',9711999212)
+insert into brands values('Gucci',7982224957)
+insert into brands values('Givenchy',2664286078)
+insert into brands values('Dior',9999453576)
+insert into brands values('Prada',9911029920)
+insert into brands values('Balmain',9811319212)
+insert into brands values('True religion',7982224954)
+insert into brands values('Amiri',9212121212)
+
+--CELEBRITY TABLE--
+
+create table celebrity(c_id int primary key identity(100,1), c_name nvarchar(20),phone_no numeric(20,0),b_id int,
+CONSTRAINT fk_b_b_id
+FOREIGN KEY(b_id)
+REFERENCES brands(b_id))
+
+insert into celebrity values('Shahid Kapoor',8527024573,1)
+insert into celebrity values('Varun Dhawan',9810095175,10)
+insert into celebrity values('Ranveer Singh',9711999212,2)
+insert into celebrity values('Deepika Padukone',7982224957,2)
+insert into celebrity values('Tiger Shroff',2664286078,6)
+insert into celebrity values('Alia Bhatt',9999453576,6)
+insert into celebrity values('Kiara Advani',9911029920,7)
+insert into celebrity values('Ananya Panday',9811319212,8)
+insert into celebrity values('Vijay Devarkonda',7982224954,9)
+insert into celebrity values( 'Amir Khan',9212121212,10)
+
+--ENDORSEMENT TABLE--
+
+create table endorsement(c_id int identity(100,1), brand_endorsed varchar(20),b_id int,
+CONSTRAINT fk_c_cid
+FOREIGN KEY (c_id)
+REFERENCES celebrity(c_id),
+
+CONSTRAINT fk_b__bid
+FOREIGN KEY (b_id)
+REFERENCES brands(b_id))
+
+insert into endorsement values('Nike',1)
+insert into endorsement values('Amiri',10)
+insert into endorsement values('Addidas',2)
+insert into endorsement values('Addidas',2)
+insert into endorsement values('Dior',6)
+insert into endorsement values('Dior',6)
+insert into endorsement values('Prada',7)
+insert into endorsement values('Balmain',8)
+insert into endorsement values('True religion',9)
+insert into endorsement values('Amiri',10)
+
+
+-- NO ENDORSEMENT BRANDS--
+
+create procedure sp_nocommn_brand
+as
+begin
+select b_name,c_name,c_id 
+from brands b
+left join celebrity c
+on b.b_id=c.b_id
+end
+exec sp_nocommn_brand
+
+--COMMON BRAND--
+
+create procedure sp_commn_brand
+as
+begin
+select b.b_id,c_name
+from brands b
+left join celebrity c
+on b.b_id=c.b_id
+end
+
+exec sp_commn_brand
+drop procedure sp_commn_brand
+
+--TRIGGERS--
+--ON BRAND TABLE--
+
+create table brand_log(LogID int identity(7000,1), brand_id int, operation nvarchar(20), updated_date datetime)
+
+create trigger brandInsertTrigger
+on brands
+for insert
+as
+insert into brand_log (brand_id, operation, updated_date)
+select b_id, 'data inserted', GETDATE() from inserted 
+
+insert into brands values('Kenzo',9910065975)
+
+--BRAND UPDATE--
+
+create trigger brandUpdateTrigger
+on brands
+after update
+as
+insert into brand_log (brand_id, operation, updated_date)
+select b_id, 'data updated', GETDATE() from inserted 
+update brands  set phone_no =9213131313 where b_id = 1
+
+--BRAND DELETE--
+create trigger branddelete1Trigger
+on brands
+after delete
+as
+insert into brand_log (brand_id, operation, updated_date)
+select b_id, 'data deleted', GETDATE() from deleted
+delete from brands where b_id=6
+
+drop trigger branddelete1Trigger
+select*from brand_log
+
+--CELEBRITY TABLE--
+
+create table celebrity_log(LogID int identity(7000,1), c_id int, operation nvarchar(20), updated_date datetime)
+
+--INSERT TRIGGER FOR CELEBRITY--
+
+create trigger cInsertTrigger
+on celebrity
+for insert
+as
+insert into celebrity_log (c_id, operation, updated_date)
+select c_id, 'data inserted', GETDATE() from inserted 
+
+insert into celebrity values('Akshay Kumar',9910065999,5)
+
+select* from celebrity
+select* from celebrity_log
+
+--UPDATE TRIGGER FOR CELEBRITY--
+
+create trigger cUpdateTrigger
+on celebrity
+after update
+as
+insert into celebrity_log (c_id, operation, updated_date)
+select c_id, 'data updated', GETDATE() from updated
+
+update celebrity set phone_no= 9812545454 where c_id = 2
+
+--DELETE TRIGGER FOR CELEBRITY
+
+create trigger celebritydeleteTrigger
+on celebrity
+after delete
+as
+insert into celebrity_log (c_id, operation, updated_date)
+select c_id, 'data deleted', GETDATE() from deleted
+delete from celebrity where b_id=6
+
+--ENDORSEMENT TABLE--
+
+create table end_log(LogID int identity(7000,1), end_id int, operation nvarchar(20), updated_date datetime)
+
+-- INSERT TRIGGER--
+
+create trigger endInsertTrigger
+on endorsement
+for insert
+as
+insert into end_log (end_id, operation, updated_date)
+select b_id, 'data inserted', GETDATE() from inserted 
+
+insert into endorsement values('d&g',5)
+
+--UPDATE TRIGGER--
+
+create trigger endUpdateTrigger
+on endorsement
+after update
+as
+insert into end_log (end_id, operation, updated_date)
+select b_id, 'data updated', GETDATE() from updated
+
+update endorsement set brand_endorsed= 'dolce' where c_id = 2
+
+--DELETE TRIGGER
+
+create trigger enddeleteTrigger
+on endorsement
+after delete
+as
+insert into end_log (end_id, operation, updated_date)
+select c_id, 'data deleted', GETDATE() from deleted
+delete from endorsement where b_id=6
+
+
+
+
+
+
